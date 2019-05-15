@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import filedialog
 import cv2
 import numpy as np
+import time
 
+#detect close block function
 def close_block_detect(list, new_element):
 	if tuple([new_element[0],new_element[1]+1]) in list:
 		return False
@@ -21,9 +23,53 @@ def close_block_detect(list, new_element):
 	if tuple([new_element[0]-1,new_element[1]]) in list:
 		return False
 	return True
+	
+#recursive to find all group	
+def recursive_group(map,group_map,i,j,index):
+	group_flag = False
+	if i != 0 and map[i-1][j] == map[i][j]:
+		if group_map[i-1][j] == -1:
+			group_flag = True
+			group_map[i-1][j] = index
+			recursive_group(map,group_map,i-1,j,index)
+	if i != 10 and map[i+1][j] == map[i][j]:
+		if group_map[i+1][j] == -1:
+			group_flag = True
+			group_map[i+1][j] = index
+			recursive_group(map,group_map,i+1,j,index)
+	if j != 0 and map[i][j-1] == map[i][j]:
+		if group_map[i][j-1] == -1:
+			group_flag = True
+			group_map[i][j-1] = index
+			recursive_group(map,group_map,i,j-1,index)
+	if j != 21 and map[i][j+1] == map[i][j]:
+		if group_map[i][j+1] == -1:
+			group_flag = True
+			group_map[i][j+1] = index
+			recursive_group(map,group_map,i,j+1,index)
+	if group_flag == True:
+		group_map[i][j] = index
+	return map, group_map
+	
+#detect available block group
+def group_block(map):
+	group_map = []
+	index = 1
+	for i in range(11):
+		group_map.append([])
+		for j in range(22):
+			group_map[-1].append(-1)
+	for i in range(11):
+		for j in range(22):
+			if group_map[i][j] == -1:
+				map,group_map = recursive_group(map,group_map,i,j,index)
+				if group_map[i][j] != -1:
+					index = index + 1
+	return group_map
 
 #block detection
 map_rgb = cv2.imread('7.png')
+group_rgb = cv2.imread('7.png')
 
 template_b1 = cv2.imread('block_1.png')
 template_b2 = cv2.imread('block_2.png')
@@ -126,8 +172,16 @@ for i in range(11):
 	map.append([])
 	for j in range(22):
 		map[-1].append(temp[j][i][1])
-	
 for i in map:
 	print(i)
+	
+print('\n\n')
+group_result = group_block(map)
 
-
+for i in range(11):
+	for j in range(22):
+		cv2.rectangle(group_rgb, temp[j][i][0], (temp[j][i][0][0] + w_b1, temp[j][i][0][1] + h_b1), (0, 0, 0), -1)
+		if group_result[i][j]>0:
+			cv2.putText(group_rgb, str(group_result[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1, cv2.LINE_AA)
+cv2.imwrite('result2.png', group_rgb)
+end = time.time()
