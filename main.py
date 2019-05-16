@@ -174,8 +174,8 @@ def dig_one_block(map, group, tap_index):
 		
 	
 #block detection
-map_rgb = cv2.imread('7.png')
-group_rgb = cv2.imread('7.png')
+map_rgb = cv2.imread('test.png')
+group_rgb = cv2.imread('test.png')
 
 template_b1 = cv2.imread('block_1.png')
 template_b2 = cv2.imread('block_2.png')
@@ -295,7 +295,7 @@ for i in range(11):
 tap_order = 1
 
 start = time.time()
-"""
+
 while group_flag:
 	#just find group with label = 1
 	min_single_block = 242
@@ -333,7 +333,7 @@ while group_flag:
 	#update to tap map to show tap order
 	for i in matches:
 		tap_map[i[0]][i[1]] = tap_order
-	temp_tap_order = tap_order + 1
+	tap_order = tap_order + 1
 	
 	group_flag = False
 	for i in group_result:
@@ -341,8 +341,8 @@ while group_flag:
 			if j == 1:
 				group_flag = True
 				break
-"""
-result = dig_one_block(map, group_result, 1)
+
+#result = dig_one_block(map, group_result, 1)
 end = time.time()
 
 print("time elapsed:",end-start)
@@ -355,7 +355,20 @@ for i in range(11):
 	for j in range(22):
 		cv2.rectangle(group_rgb, temp[j][i][0], (temp[j][i][0][0] + w_b1, temp[j][i][0][1] + h_b1), (0, 0, 0), -1)
 		if tap_map[i][j]>0:
-			cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1, cv2.LINE_AA)
+			if tap_map[i][j] < 10:
+				cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
+			elif tap_map[i][j] < 20:
+				cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1, cv2.LINE_AA)
+			elif tap_map[i][j] < 30:
+				cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
+			elif tap_map[i][j] < 40:
+				cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 1, cv2.LINE_AA)
+			elif tap_map[i][j] < 50:
+				cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1, cv2.LINE_AA)
+			elif tap_map[i][j] < 60:
+				cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 1, cv2.LINE_AA)
+			else:
+				cv2.putText(group_rgb, str(tap_map[i][j]), tuple([temp[j][i][0][0], temp[j][i][0][1]+40]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1, cv2.LINE_AA)
 		else:
 			left_block = left_block + 1
 cv2.imwrite('result2.png', group_rgb)
