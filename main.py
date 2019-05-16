@@ -299,7 +299,7 @@ start = time.time()
 result_map = []
 result_tap = []
 min_single_block = 242
-while group_flag < 10000:
+while min_single_block > 24:
 	if group_flag % 1000 == 0:
 		print(group_flag)
 	tap_order = 1
@@ -368,7 +368,7 @@ while group_flag < 10000:
 		tap_map = temp_tap  
 	group_flag = group_flag + 1
 	
-
+print("stop at iter :",group_flag)
 #result = dig_one_block(map, group_result, 1)
 end = time.time()
 
