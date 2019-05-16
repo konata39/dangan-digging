@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import time
 import copy
+import random
 
 #detect close block function
 def close_block_detect(list, new_element):
@@ -174,8 +175,8 @@ def dig_one_block(map, group, tap_index):
 		
 	
 #block detection
-map_rgb = cv2.imread('test.png')
-group_rgb = cv2.imread('test.png')
+map_rgb = cv2.imread('4.png')
+group_rgb = cv2.imread('4.png')
 
 template_b1 = cv2.imread('block_1.png')
 template_b2 = cv2.imread('block_2.png')
@@ -285,24 +286,29 @@ print('\n\n')
 group_result = group_block(map)
 
 #break grouped block (always break group 1 blocks)
-group_flag = True
+group_flag = 0
 tap_map = []
 for i in range(11):
 	tap_map.append([])
 	for j in range(22):
 		tap_map[-1].append(-1)
 
-tap_order = 1
+
 
 start = time.time()
-
-while group_flag:
+result_map = []
+result_tap = []
+min_single_block = 242
+while group_flag < 10000:
+	if group_flag % 1000 == 0:
+		print(group_flag)
+	tap_order = 1
+	temp_map = copy.deepcopy(map)
+	temp_group = copy.deepcopy(group_result)
 	#just find group with label = 1
-	min_single_block = 242
 	min_block_label = 0
-	
-	total_group = find_total_group(group_result)
-	for i in range(1, total_group+1):
+
+	"""for i in range(1, total_group+1):
 		matches = locate_block(group_result, i) 
 		
 		#delete block and change label near block
@@ -320,27 +326,48 @@ while group_flag:
 		if min_single_block > temp_left_block:
 			min_single_block = temp_left_block
 			min_block_label = i
+	"""
+	have_group = True
+	temp_tap = []
+	for i in range(11):
+		temp_tap.append([])
+		for j in range(22):
+			temp_tap[-1].append(-1)
+	while have_group:
+		total_group = find_total_group(temp_group)
+	
+		block_label = random.randint(1, total_group)
 		
-	#found least single block, update to real map and group result
-	matches = locate_block(group_result, min_block_label) 
-		
-	#delete block and change label near block
-	map = delete_block(map, matches)
+		#found least single block, update to real map and group result
+		matches = locate_block(temp_group, block_label) 
+			
+		#delete block and change label near block
+		temp_map = delete_block(temp_map, matches)
 
-	#regroup
-	group_result = group_block(map)
+		#regroup
+		temp_group = group_block(temp_map)
+		
+		#update to tap map to show tap order
+		for i in matches:
+			temp_tap[i[0]][i[1]] = tap_order
+		tap_order = tap_order + 1
+		
+		have_group = False
+		for i in temp_group:
+			for j in i:
+				if j == 1:
+					have_group = True
+					break
+	local_left_block = 0
+	for i in range(11):
+		for j in range(22):
+			if temp_tap[i][j]<=0:
+				local_left_block = local_left_block + 1
+	if min_single_block > local_left_block:
+		min_single_block = local_left_block
+		tap_map = temp_tap  
+	group_flag = group_flag + 1
 	
-	#update to tap map to show tap order
-	for i in matches:
-		tap_map[i[0]][i[1]] = tap_order
-	tap_order = tap_order + 1
-	
-	group_flag = False
-	for i in group_result:
-		for j in i:
-			if j == 1:
-				group_flag = True
-				break
 
 #result = dig_one_block(map, group_result, 1)
 end = time.time()
